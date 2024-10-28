@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Analysis Chatbot Search</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .loading-message {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff3cd;
+            border-radius: 4px;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            display: none;
+        }
+    </style>
+    <script>
+        function showLoadingMessage() {
+            document.getElementById('loading-message').style.display = 'block';
+        }
+        function hideLoadingMessage() {
+            document.getElementById('loading-message').style.display = 'none';
+        }
+        function formatMarkdown(text) {
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/(~다\.)/g, '$1<br>')
+                .replace(/\.(?!\s|$)/g, '.<br>')
+                .replace(/##(.*?)(\n|$)/g, '<h3>$1</h3>')
+                .replace(/\*/g, '<br>')
+                .replace(/\.(\s|$)/g, '.<br>');
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            const responseElement = document.querySelector('.response p');
+            if (responseElement) {
+                responseElement.innerHTML = formatMarkdown(responseElement.innerHTML);
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>트램Fun린 Chatbot</h2>
+        <form action="/chat_ui" method="POST" onsubmit="showLoadingMessage()">
+            <div class="form-group">
+                <label for="location">지역: (예시: 서울시 종로구, 서울시 용산구, 경기도 안산시, 포항시 등)</label>
+                <input type="text" id="location" name="location" required>
+            </div>
+            <div class="form-group">
+                <label for="place">원하는 장소: (예시: 병원, 중국집, 치과, 음식점 등)</label>
+                <input type="text" id="place" name="place" required>
+            </div>
+            <div class="form-group">
+                <label for="question">궁금한 사항: (예시: 감기약 독한거 주는 곳 추천해줘, 짬뽕 맛있는 집 추천해줘 등)</label>
+                <textarea id="question" name="question" rows="4" required></textarea>
+            </div>
+            <button type="submit">검색하기</button>
+        </form>
+
+        <!-- 로딩 메시지 -->
+        <div id="loading-message" class="loading-message">
+            잠시만 기다려주세요!
+        </div>
+
+        <!-- 응답을 이곳에 표시 -->
+        {% if response %}
+        <script>
+            hideLoadingMessage();
+        </script>
+        <div class="response">
+            <h3>추천 결과:</h3>
+            <p>{{ response | safe }}</p>
+        </div>
+        {% elif error %}
+        <script>
+            hideLoadingMessage();
+        </script>
+        <div class="response" style="color: red;">
+            <h3>오류 발생:</h3>
+            <p>{{ error }}</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
